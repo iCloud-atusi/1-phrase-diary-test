@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>日記サイト</title>
+    <style>
+
+        @font-face {
+            font-family: 'AtusiFont';
+            /* src: url('Atusi_font-Regular.otf') format('opentype'); */
+            /* src: url('SuperMario.ttf') format('opentype'); */
+            src: url('Noto_sans.ttf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'AtusiFont', sans-serif;
+            /* font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif; */
+            font-weight: bold;  /* 太字を適用 */
+        }
+
+
+        /* body { margin: 0; font-family: 'Arial', sans-serif; } */
+        section { margin: 20px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .eyeball {
+            width: 80px;  /* 目玉のサイズを小さく設定 */
+            height: 80px;
+            background-color: white;
+            border: 2px solid #000;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin: 10px; /* 目玉の間にマージンを追加 */
+        }
+        .pupil {
+            position: absolute;
+            width: 30px;  /* 瞳のサイズを小さく設定 */
+            height: 30px;
+            background-color: black;
+            border-radius: 50%;
+            left: 25px;  /* 初期位置を調整 */
+            top: 25px;
+            transition: transform 0.1s;
+        }
+
+        /* スクロールインジケーターのスタイル */
+        #progressBar {
+            position: fixed;
+            width: 100%;
+            height: 8px;
+            background: #f3f3f3;
+            top: 0;
+            left: 0;
+            font-size: 30px;
+        }
+        #progressBar div {
+            height: 100%;
+            background: #4caf50;
+            width: 0%;
+        }
+
+        /* 新しく追加したカーソルアニメーションのスタイル */
+        /* body {
+            cursor: none;
+        } */
+        .cursor, .cursor-trail {
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+        }
+        .cursor::after, .cursor-trail::after {
+            content: "";
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            border: 8px solid rgba(128, 128, 128, 0.5);
+            border-radius: 50%;
+            opacity: .5;
+            top: -8px;
+            left: -8px;
+        }
+        .cursor-trail {
+            transition: 0.1s;
+            opacity: 0.3;
+        }
+        .click-animation {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            animation: clickAnimation 0.5s ease-out;
+            background-color: green;  /* この行を追加 */
+            /* mix-blend-mode: difference; */
+        }
+        @keyframes clickAnimation {
+            0% {
+                transform: scale(0);
+                opacity: 0.7;
+                background-color: green;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+                background-color: green;
+            }
+        }
+
+        canvas {
+                position: fixed;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                z-index: 9990;
+            }
+    </style>
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <!-- <link rel="stylesheet" type="text/css" href="styles.css"> -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+</head>
+
+<body>
+    <canvas id="particleCanvas"></canvas>
+    <div class="cursor"></div>
+    <div id="progressBar">
+        <div>
+            <span id="progressText">0%</span>
+        </div>
+    </div>
+
+    <header>
+        <h1>公式サイト </h1>
+        <p>HTMLの基本的な構造とマウスに追随する目玉のデモです。これからはこのサイトを工事していって，毎日日記を書けたらいいなと思っています</p>
+    </header>
+
+    <main>
+        <!-- リンクと画像 -->
+        <section>
+            <h2>画像貼り付け例</h2>
+            <img src="/images/20240430curry.jpg" alt="サンプル画像" width="300">
+            今日作ったカレー
+        </section>
+
+        <section>
+            <h2>リンク例</h2>
+            <p><a href="https://www.1101.com/home.html">僕が毎日読んでるもの。毎日更新されててほんとにすごい</a>←クリックで移動</p>
+            自分もこんな感じでかけたらいいな。
+        </section>
+
+        <!-- インタラクティブな目玉 -->
+        <section>
+            <h2>インタラクティブな目玉のデモ</h2>
+            <center>
+            <div class="eyeball">
+                <div class="pupil"></div>
+            </div>
+            <div class="eyeball">
+                <div class="pupil"></div>
+            </div>
+            <h4>chatGPTがかいてくれました．すげー！</h4>
+            </center>
+        </section>
+        <section>
+            <p><a href="https://www.1101.com/home.html">感じたこと、気づいたことまとめページ</a></p> <!-- あとで置き換える -->
+        </section>
+        <!-- 本編（日記） -->
+        <h2>本編（日記）！</h2>
+        <p>「今日は、HTMLの基本的な構造を学びました。HTMLは、Webページの構造を定義するための言語です。HTMLの基本的な構造は、
+            <code>&lt;!DOCTYPE html&gt;</code>、
+            <code>&lt;html&gt;</code>、<code>&lt;head&gt;</code>、
+            <code>&lt;title&gt;</code>、
+            <code>&lt;body&gt;</code>
+            などの要素で構成されています。」</p>
+            <p>と，GPTがかいてくれました． </p>
+            
+            <p>ここから本人↓ </p>
+
+            <!-- <B>25/11/17</B>
+            <ul>
+                <p>
+                こちらテンプレート。今日はこういう事があった。<a href="https://youtu.be/iivprdEFSvs?si=ji_eNX15OPSJzfQw">このクルスゲザアクトの動画</a>を見た．とても楽しい．<br>
+                </p>
+            </ul> -->
+
+    
+        </main>
+    
+        <footer>
+            <p>&copy; 2024 HTMLとインタラクティブな目玉のデモ</p>
+        </footer>
+    
+        <div style="height: 500px;"> <!-- デモ用に高さを追加 -->
+        </div>
+    
+        <script>
+            const eyeballs = document.querySelectorAll('.eyeball');
+            document.addEventListener('mousemove', function(event) {
+                eyeballs.forEach(eyeball => {
+                    const rect = eyeball.getBoundingClientRect();
+                    const x = event.clientX - rect.left - rect.width / 2;
+                    const y = event.clientY - rect.top - rect.height / 2;
+                    const distance = Math.min(Math.sqrt(x * x + y * y), rect.width / 2 - 15);  // 移動距離の制限を調整
+                    const angle = Math.atan2(y, x);
+                    const pupil = eyeball.querySelector('.pupil');
+                    pupil.style.transform = `translate(${distance * Math.cos(angle)}px, ${distance * Math.sin(angle)}px)`;
+                });
+            });
+    
+            // スクロールイベントリスナーを追加
+            window.onscroll = function() {updateProgressBar()};
+    
+            function updateProgressBar() {
+                var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                var scrolled = (winScroll / height) * 100;
+                var progressBar = document.getElementById("progressBar").children[0];
+                progressBar.style.width = scrolled + "%";
+                document.getElementById("progressText").innerText = Math.round(scrolled) + "%";
+            }
+    
+            // 新しく追加したカーソルアニメーションのスクリプト
+            const cursor = document.querySelector('.cursor');
+            const body = document.body;
+            let mouseX = 0;
+            let mouseY = 0;
+    
+            // 残像効果のための配列
+            const cursorTrails = [];
+            const trailCount = 5;
+    
+            for (let i = 0; i < trailCount; i++) {
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                body.appendChild(trail);
+                cursorTrails.push(trail);
+            }
+    
+            function updateCursorPosition(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursor.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+    
+                // 残像効果の更新
+                setTimeout(() => {
+                    cursorTrails.forEach((trail, index) => {
+                        setTimeout(() => {
+                            trail.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+                        }, index * 40);
+                    });
+                }, 50);
+            }
+    
+            function createClickAnimation(e) {
+                const clickAnim = document.createElement('div');
+                clickAnim.className = 'click-animation';
+                clickAnim.style.left = `${e.clientX - 15}px`;
+                clickAnim.style.top = `${e.clientY - 15}px`;
+                body.appendChild(clickAnim);
+    
+                setTimeout(() => {
+                    body.removeChild(clickAnim);
+                }, 500);
+            }
+    
+            document.addEventListener('mousemove', updateCursorPosition);
+            
+            // クリックイベントの調整
+            document.addEventListener('click', createClickAnimation);
+            
+            // リンクやボタンなどのクリック可能な要素に対する処理
+            document.querySelectorAll('a, button, input[type="submit"], input[type="button"]').forEach(element => {
+                element.addEventListener('click', (e) => {
+                    createClickAnimation(e);
+                    e.stopPropagation(); // イベントの伝播を停止
+                });
+            });
+        </script>
+        <script>
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            let particles = [];
+            let mouserainX = 0;
+            let mouserainY = 0;
+            
+            class Particle {
+                constructor(x, y) {
+                    this.x = x + (Math.random() - 0.5) * 20;
+                    this.y = y + (Math.random() - 0.5) * 20;
+                    this.size = Math.random() * 5 + 1;
+                    this.speedY = Math.random() * 1 - 0.5;
+                    this.color = `hsl(${Math.random() * 60 + 180}, 100%, 50%)`;
+                }
+            
+                update() {
+                    this.y += this.speedY;
+                    this.speedY += 0.1;
+                    if (this.size > 0.1) this.size -= 0.1;
+                }
+            
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            function createParticles(x, y) {
+                for (let i = 0; i < 3; i++) {
+                    particles.push(new Particle(x, y));
+                }
+            }
+            
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                    
+                    if (particles[i].size <= 0.1) {
+                        particles.splice(i, 1);
+                        i--;
+                    }
+                }
+                
+                requestAnimationFrame(animateParticles);
+            }
+            
+            window.addEventListener('mousemove', function(e) {
+                mouserainX = e.clientX;
+                mouserainY = e.clientY;
+                createParticles(mouserainX, mouserainY);
+            });
+            
+            // マウスが動いていなくても粒子を生成
+            setInterval(function() {
+                createParticles(mouserainX, mouserainY);
+            }, 50);
+            
+            animateParticles();
+            
+            // ウィンドウサイズが変更されたときにキャンバスサイズを更新
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+            </script>
+    </body>
+    </html>
